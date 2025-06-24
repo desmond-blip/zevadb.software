@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lab Test Submission</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    .form-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100%;
+    }
+    button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Submit Lab Test Results</h2>
+    <form id="labForm">
+      <label for="id">ID:</label>
+      <input type="text" id="id" name="id" required>
+
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" rows="4" required></textarea>
+
+      <label for="testType">Test Type:</label>
+      <select id="testType" name="testType" required>
+        <option value="">Select a test</option>
+        <option value="Blood Test">Blood Test</option>
+        <option value="X-Ray">X-Ray</option>
+        <option value="MRI">MRI</option>
+        <option value="Saliva Test">Saliva Test</option>
+        <option value="Stool Test">Stool Test</option>
+      </select>
+
+      <label for="doctor">Doctor:</label>
+      <select id="doctor" name="doctor" required>
+        <option value="">Select Doctor</option>
+        <option value="Dr. Achieng">Dr. Achieng</option>
+        <option value="Dr. Kamau">Dr. Kamau</option>
+        <option value="Dr. Otieno">Dr. Otieno</option>
+      </select>
+
+      <button type="submit">Submit Results</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("labForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const record = {
+        id: document.getElementById("id").value,
+        description: document.getElementById("description").value,
+        testType: document.getElementById("testType").value,
+        doctor: document.getElementById("doctor").value
+      };
+
+      const labData = JSON.parse(localStorage.getItem("labData")) || [];
+      labData.push(record);
+      localStorage.setItem("labData", JSON.stringify(labData));
+
+      alert("Lab test submitted successfully!");
+      window.location.href = "select.html";
+    });
+  </script>
+
+</body>
+</html>

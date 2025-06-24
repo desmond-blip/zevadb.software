@@ -1,0 +1,163 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lab Test Records</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .recommendation {
+      margin-top: 40px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .recommendation label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .recommendation textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .submit-button {
+      margin-top: 15px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .submit-button:hover {
+      background-color: #218838;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Lab Test Records</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Patient ID</th>
+          <th>Test Type</th>
+          <th>Description</th>
+          <th>Doctor's Name</th>
+        </tr>
+      </thead>
+      <tbody id="recordsTableBody">
+        <!-- Data will be injected here -->
+      </tbody>
+    </table>
+
+    <div class="recommendation">
+      <label for="labResults">Lab Technician Recommendation / Results:</label>
+      <textarea id="labResults" placeholder="Enter your analysis or recommendations here..."></textarea>
+      <button class="submit-button" onclick="submitRecommendation()">Submit Recommendation</button>
+      <a href="submit.html" class="back-link">Send Back to Doctor</a>
+    </div>
+  </div>
+
+  <script>
+    let labData = JSON.parse(localStorage.getItem("labData")) || [];
+    const tableBody = document.getElementById("recordsTableBody");
+
+    // Display records
+    labData.forEach((record, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${record.id}</td>
+        <td>${record.testType}</td>
+        <td>${record.description}</td>
+        <td>${record.doctor}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    function submitRecommendation() {
+      const recommendation = document.getElementById("labResults").value.trim();
+
+      if (!recommendation) {
+        alert("Please enter a recommendation.");
+        return;
+      }
+
+      // Assume the latest entry should receive the recommendation
+      const latestIndex = labData.length - 1;
+
+      labData[latestIndex].diagnosis = recommendation;
+
+      localStorage.setItem("labData", JSON.stringify(labData));
+
+      alert("Recommendation submitted successfully.");
+      document.getElementById("labResults").value = "";
+    }
+  </script>
+
+</body>
+</html>

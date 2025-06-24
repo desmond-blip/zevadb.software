@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Review Lab Results</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    .nav-button {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .nav-button a {
+      text-decoration: none;
+    }
+
+    .nav-button button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .nav-button button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    textarea {
+      height: 60px;
+    }
+
+    button.send-button {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button.send-button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Doctor Panel - Review Lab Results</h2>
+  
+  <div class="nav-button">
+    <a href="dispense.html">
+      <button>Go to Chemist Page</button>
+    </a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Patient ID</th>
+        <th>Test Type</th>
+        <th>Description</th>
+        <th>Doctor</th>
+        <th>Diagnosis</th>
+        <th>Injection</th>
+        <th>Drug Description</th>
+        <th>Send to Chemist</th>
+      </tr>
+    </thead>
+    <tbody id="doctorTableBody">
+      <!-- Data will be injected here -->
+    </tbody>
+  </table>
+
+  <script>
+    const labData = JSON.parse(localStorage.getItem("labData")) || [];
+    const doctorTableBody = document.getElementById("doctorTableBody");
+
+    labData.forEach((record, index) => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${record.id}</td>
+        <td>${record.testType}</td>
+        <td>${record.description}</td>
+        <td>${record.doctor}</td>
+        <td>${record.diagnosis || "Not Provided"}</td>
+        <td><input type="text" id="injection-${index}" placeholder="Enter injection"></td>
+        <td><textarea id="drug-${index}" placeholder="Enter drug description"></textarea></td>
+        <td><button class="send-button" onclick="sendToChemist(${index})">Send</button></td>
+      `;
+
+      doctorTableBody.appendChild(row);
+    });
+
+    function sendToChemist(index) {
+      const injection = document.getElementById(`injection-${index}`).value;
+      const drug = document.getElementById(`drug-${index}`).value;
+
+      if (!injection || !drug) {
+        alert("Please fill both injection and drug fields before sending.");
+        return;
+      }
+
+      const record = labData[index];
+      const updatedRecord = {
+        ...record,
+        injection,
+        drug
+      };
+
+      const chemistData = JSON.parse(localStorage.getItem("chemistData")) || [];
+      chemistData.push(updatedRecord);
+      localStorage.setItem("chemistData", JSON.stringify(chemistData));
+
+      alert("Record sent to chemist successfully.");
+      window.location.href = "dispense.html";
+    }
+  </script>
+
+</body>
+</html>

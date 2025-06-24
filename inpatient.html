@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inpatient Records</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #eef2f3; padding: 20px; }
+    h2 { text-align: center; color: #2c3e50; }
+    input[type="text"] {
+      padding: 10px; width: 60%; margin: 10px auto; display: block;
+      border: 1px solid #ccc; border-radius: 5px;
+    }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 20px; background: white;
+    }
+    th, td {
+      border: 1px solid #ccc; padding: 10px; text-align: left;
+    }
+    th {
+      background: #3498db; color: white;
+    }
+    tfoot td {
+      font-weight: bold; background: #f1f1f1;
+    }
+    button {
+      margin: 10px 5px; padding: 6px 12px;
+      background: #2ecc71; color: white; border: none; border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #27ae60;
+    }
+    .update-btn { background: #f39c12; }
+    .update-btn:hover { background: #e67e22; }
+    .pdf-btn { background: #3498db; }
+    .pdf-btn:hover { background: #2980b9; }
+    .delete-btn { background: #e74c3c; }
+    .delete-btn:hover { background: #c0392b; }
+  </style>
+</head>
+<body>
+
+<h2>Inpatient Records</h2>
+<input type="text" id="searchInput" placeholder="Search by patient name..." onkeyup="filterTable()">
+<input type="text" id="deleteInput" placeholder="Enter name to delete record">
+<button class="delete-btn" onclick="deleteByName()">Delete Patient by Name</button>
+
+<table id="patientTable">
+  <thead>
+    <tr>
+      <th>ZH Reg. Code</th><th>Patient Name</th><th>Age</th><th>Village</th><th>Contact</th>
+      <th>Gender</th><th>National ID</th><th>Paying</th><th>Date In</th><th>Time In</th><th>Date Out</th><th>Time Out</th>
+      <th>Ward</th><th>Bed</th><th>Testing</th><th>Diagnosis</th><th>Description</th><th>Amount Used</th>
+      <th>Doctor (Day)</th><th>Doctor (Night)</th><th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+  <tfoot>
+    <tr>
+      <td colspan="17" style="text-align: right;">Total Amount Used:</td>
+      <td colspan="4" id="totalAmount">Ksh 0</td>
+    </tr>
+  </tfoot>
+</table>
+
+<button onclick="downloadExcel()">Download Excel</button>
+
+<script>
+  const tableBody = document.querySelector("#patientTable tbody");
+  const totalAmountCell = document.getElementById("totalAmount");
+
+  function getCodeMap() {
+    return JSON.parse(localStorage.getItem("zmCodeMap") || "{}");
+  }
+
+  function setCodeMap(map) {
+    localStorage.setItem("zmCodeMap", JSON.stringify(map));
+  }
+
+  function getZHCode(name) {
+    const map = getCodeMap();
+    if (!map[name]) {
+      const newCode = "ZH" + String(Object.keys(map).length + 1).padStart(4, '0');
+      map[name] = newCode;
+      setCodeMap(map);
+    }
+    return map[name];
+  }
+
+  function loadPatients() {
+    const patients = JSON.parse(localStorage.getItem("patients")) || [];
+    tableBody.innerHTML = "";
+    let total = 0;
+
+    patients.forEach((p, i) => {
+      const zhCode = getZHCode(p.name);
+      const row = tableBody.insertRow();
+      row.innerHTML = `
+        <td>${zhCode}</td>
+        <td>${p.name}</td><td>${p.age}</td><td>${p.village}</td><td>${p.number}</td>
+        <td>${p.gender}</td><td>${p.nationalId || ''}</td><td>${p.paying || p.paid}</td>
+        <td>${p.date}</td><td>${p.time}</td><td>${p.dateOut}</td><td>${p.timeOut}</td>
+        <td>${p.ward}</td><td>${p.bed}</td>
+        <td>${p.testing || ''}</td><td>${p.diagnosis || ''}</td>
+        <td>${p.drugsDescription}</td>
+        <td>${p.amountUsed}</td><td>${p.docDay}</td><td>${p.docNight}</td>
+        <td>
+          <button class="update-btn" onclick="updateRow(${i})">Update</button>
+          <button class="pdf-btn" onclick="generatePDF(${i})">PDF</button>
+        </td>
+      `;
+      total += Number(p.amountUsed) || 0;
+    });
+
+    totalAmountCell.textContent = "Ksh " + total.toLocaleString();
+  }
+
+  function deleteByName() {
+    const name = document.getElementById("deleteInput").value.trim().toLowerCase();
+    if (!name) return alert("Please enter a name.");
+
+    let patients = JSON.parse(localStorage.getItem("patients")) || [];
+    const initialCount = patients.length;
+    patients = patients.filter(p => p.name.toLowerCase() !== name);
+    localStorage.setItem("patients", JSON.stringify(patients));
+
+    if (patients.length < initialCount) {
+      alert("Patient record deleted.");
+    } else {
+      alert("No matching patient found.");
+    }
+
+    loadPatients();
+  }
+
+  function updateRow(index) {
+    const patients = JSON.parse(localStorage.getItem("patients")) || [];
+    const patient = patients[index];
+    const newDesc = prompt("Enter new drug description:", patient.drugsDescription || "");
+    const newAmount = prompt("Enter new amount used:", patient.amountUsed || "");
+
+    if (newDesc !== null && newAmount !== null && !isNaN(newAmount)) {
+      patient.drugsDescription = newDesc.trim();
+      patient.amountUsed = parseFloat(newAmount).toFixed(2);
+      patients[index] = patient;
+      localStorage.setItem("patients", JSON.stringify(patients));
+      loadPatients();
+    } else {
+      alert("Invalid input. Update cancelled.");
+    }
+  }
+
+  function generatePDF(index) {
+    const patients = JSON.parse(localStorage.getItem("patients")) || [];
+    const p = patients[index];
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const today = new Date().toLocaleDateString();
+    const zhCode = getZHCode(p.name);
+
+    doc.setFontSize(14);
+    doc.text("ZEVA Medical Centre", 105, 15, null, null, "center");
+    doc.setFontSize(12);
+    doc.text("Inpatient Summary Report", 105, 25, null, null, "center");
+
+    const lines = [
+      `Patient Name: ${p.name}`,
+      `Age: ${p.age}`,
+      `ZH Code: ${zhCode}`,
+      `National ID: ${p.nationalId || "-"}`,
+      `Diagnosis: ${p.diagnosis || "-"}`,
+      `Drugs Given: ${p.drugsDescription || "-"}`,
+      `Amount Paid: Ksh ${p.amountUsed || "0.00"}`,
+      `Doctor (Day): ${p.docDay || "-"}`,
+      `Doctor (Night): ${p.docNight || "-"}`,
+      `Date In: ${p.date} | Time In: ${p.time}`,
+      `Date Out: ${p.dateOut || "-"} | Time Out: ${p.timeOut || "-"}`,
+      `Ward: ${p.ward || "-"} | Bed: ${p.bed || "-"}`,
+      `Testing: ${p.testing || "-"}`,
+    ];
+
+    doc.setFont("Courier");
+    lines.forEach((line, i) => doc.text(line, 20, 40 + (i * 10)));
+
+    doc.text("Signature: ___________________________", 20, 160);
+    doc.text(`Date: ${today}`, 150, 160);
+    doc.save(`Patient_${p.name.replace(/\s+/g, '_')}.pdf`);
+  }
+
+  function filterTable() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = tableBody.getElementsByTagName("tr");
+    for (let row of rows) {
+      const name = row.cells[1].textContent.toLowerCase();
+      row.style.display = name.includes(input) ? "" : "none";
+    }
+  }
+
+  function downloadExcel() {
+    const wb = XLSX.utils.book_new();
+    const ws_data = [["ZH Reg. Code", "Patient Name", "Age", "Village", "Contact",
+      "Gender", "National ID", "Paying", "Date In", "Time In", "Date Out", "Time Out",
+      "Ward", "Bed", "Testing", "Diagnosis", "Description", "Amount Used", "Doctor (Day)", "Doctor (Night)"]];
+
+    const patients = JSON.parse(localStorage.getItem("patients")) || [];
+    let total = 0.00;
+
+    patients.forEach((p, i) => {
+      const code = getZHCode(p.name);
+      const row = [
+        code, p.name, p.age, p.village, p.number, p.gender, p.nationalId || '',
+        p.paying || p.paid, p.date, p.time, p.dateOut, p.timeOut, p.ward, p.bed,
+        p.testing || '', p.diagnosis || '', p.drugsDescription, p.amountUsed, p.docDay, p.docNight
+      ];
+      total += Number(p.amountUsed) || 0.00;
+      ws_data.push(row);
+    });
+
+    ws_data.push(["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "Total", total, "", ""]);
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    XLSX.utils.book_append_sheet(wb, ws, "Inpatient Records");
+    XLSX.writeFile(wb, "Inpatient_Records.xlsx");
+  }
+
+  window.onload = loadPatients;
+</script>
+</body>
+</html>

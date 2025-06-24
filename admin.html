@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hospital Workflow with Actions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f6ff;
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 95%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    }
+
+    th, td {
+      padding: 18px;
+      text-align: center;
+      border: 1px solid #ddd;
+      font-size: 1.05em;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .step {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .action-btn {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+      margin: 5px;
+    }
+
+    .action-btn:hover {
+      background-color: #218838;
+    }
+
+    .arrow {
+      font-size: 22px;
+      color: #888;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    @media (max-width: 600px) {
+      table, th, td {
+        font-size: 14px;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Hospital Patient Workflow with Actions</h2>
+
+  <table>
+    <tr>
+      <th>Step</th>
+      <th>Department</th>
+      <th>Description</th>
+      <th>Action</th>
+    </tr>
+
+    <tr>
+      <td class="step">1</td>
+      <td>Reception</td>
+      <td>Register patient details and generate ID.</td>
+      <td><a href="register.html"><button class="action-btn">Register Patient</button></a></td>
+    </tr>
+
+    <tr>
+      <td class="arrow">⬇</td>
+      <td colspan="3">Patient sent to Doctor for consultation</td>
+    </tr>
+
+    <tr>
+      <td class="step">2</td>
+      <td>Doctor - Consultation Room</td>
+      <td>Initial diagnosis and test recommendation.</td>
+      <td><a href="select.html"><button class="action-btn">Send to Lab</button></a></td>
+    </tr>
+
+    <tr>
+      <td class="arrow">⬇</td>
+      <td colspan="3">Lab tests requested</td>
+    </tr>
+
+    <tr>
+      <td class="step">3</td>
+      <td>Laboratory</td>
+      <td>Conduct diagnostic tests as per doctor's order.</td>
+      <td><a href="submit.html"><button class="action-btn">Submit Results</button></a></td>
+    </tr>
+
+    <tr>
+      <td class="arrow">⬇</td>
+      <td colspan="3">Lab results returned to Doctor</td>
+    </tr>
+
+    <tr>
+      <td class="step">4</td>
+      <td>Doctor - Review Results</td>
+      <td>Evaluate test results and decide if outpatient or inpatient.</td>
+      <td>
+        <a href="prescribe.html"><button class="action-btn">Refer Outpatient</button></a>
+        <a href="ward.html"><button class="action-btn">Refer Inpatient</button></a>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="arrow">⬇</td>
+      <td colspan="3">If Inpatient: Assign to Ward</td>
+    </tr>
+
+    <tr id="ward">
+      <td class="step">4.1</td>
+      <td>Admission Office</td>
+      <td>Assign ward and bed number to inpatient.</td>
+      <td>
+        <a href="ward.html"><button class="action-btn">Assign Ward</button></a>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="arrow">⬇</td>
+      <td colspan="3">Prescription forwarded to Chemist</td>
+    </tr>
+
+    <tr>
+      <td class="step">5</td>
+      <td>Chemist / Pharmacy</td>
+      <td>Dispense prescribed medicines to the patient.</td>
+      <td><a href="dispense.html"><button class="action-btn">Dispense</button></a></td>
+    </tr>
+
+    <tr>
+      <td class="arrow">⬇</td>
+      <td colspan="3">Patient sent for payment</td>
+    </tr>
+
+    <tr>
+      <td class="step">6</td>
+      <td>Cashier</td>
+      <td>Process payment for services and medicines.</td>
+      <td><a href="payment.html"><button class="action-btn">Complete Payment</button></a></td>
+    </tr>
+
+  </table>
+  
+  </table>
+
+  <!-- New buttons below the workflow table -->
+  <div style="text-align: center; margin-top: 40px;">
+    <button class="action-btn" style="background-color: #007bff;" onclick="window.location.href='outpatient.html'">View Outpatient Records</button>
+    <button class="action-btn" style="background-color: #6f42c1;" onclick="window.location.href='inpatient.html'">View Inpatient Records</button>
+  </div>
+
+</body>
+</html>

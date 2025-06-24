@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Database</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #eef2f3;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 0 auto 30px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    form div {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    input[type="submit"] {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #2980b9;
+    }
+
+    table {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background-color: white;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Patient Database</h1>
+
+  <form>
+    <div>
+      <label for="id">Patient ID:</label>
+      <input type="text" id="id" name="id" required>
+    </div>
+    <div>
+      <label for="name">Patient Name:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+      <label for="age">Age:</label>
+      <input type="number" id="age" name="age" required>
+    </div>
+    <div>
+      <label for="village">Village:</label>
+      <input type="text" id="village" name="village" required>
+    </div>
+    <div>
+      <label for="number">Contact Number:</label>
+      <input type="text" id="number" name="number" required>
+    </div>
+    <div>
+      <label for="gender">Gender:</label>
+      <input type="text" id="gender" name="gender">
+    </div>
+    <div>
+      <label for="blood">Blood Group:</label>
+      <input type="text" id="blood" name="blood">
+    </div>
+    <div>
+      <label for="diagnosis">Diagnosis:</label>
+      <input type="text" id="diagnosis" name="diagnosis" required>
+    </div>
+    <div>
+      <input type="submit" value="Add Patient">
+    </div>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Patient ID</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Village</th>
+        <th>Contact Number</th>
+        <th>Gender</th>
+        <th>Blood Group</th>
+        <th>Diagnosis</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>001</td>
+        <td>John Doe</td>
+        <td>45</td>
+        <td>Greenfield</td>
+        <td>1234567890</td>
+        <td>Male</td>
+        <td>O+</td>
+        <td>Diabetes</td>
+      </tr>
+      <tr>
+        <td>002</td>
+        <td>Jane Smith</td>
+        <td>32</td>
+        <td>Mapleton</td>
+        <td>9876543210</td>
+        <td>Female</td>
+        <td>A-</td>
+        <td>Hypertension</td>
+      </tr>
+      <tr>
+        <td>003</td>
+        <td>Samuel Lee</td>
+        <td>27</td>
+        <td>Hilltown</td>
+        <td>5551122334</td>
+        <td>Male</td>
+        <td>B+</td>
+        <td>Asthma</td>
+      </tr>
+      <tr>
+        <td>004</td>
+        <td>Maria Garcia</td>
+        <td>54</td>
+        <td>Riverdale</td>
+        <td>3332211445</td>
+        <td>Female</td>
+        <td>AB+</td>
+        <td>Arthritis</td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

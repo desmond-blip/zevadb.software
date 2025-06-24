@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inpatient Entry</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #eef2f3;
+    }
+    form {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    form div {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+    }
+    .group-3 {
+      display: flex;
+      gap: 15px;
+    }
+    .group-3 > div {
+      flex: 1;
+    }
+    input[type="submit"] {
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Inpatient Information Entry</h2>
+  <form id="patientForm">
+    <div><label>Name:</label><input type="text" id="patientName" required></div>
+    <div><label>Age:</label><input type="number" id="age" required></div>
+    <div><label>Village:</label><input type="text" id="village" required></div>
+    <div><label>Contact Number:</label><input type="text" id="number" required></div>
+    <div><label>Gender:</label>
+      <select id="gender" required>
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div><label>National ID:</label><input type="text" id="nationalId" required></div>
+    <div><label>Paid:</label>
+      <select id="paid" required>
+        <option value="">Select</option>
+        <option>SHA</option>
+        <option>CASH</option>
+        <option>M-PESA</option>
+      </select>
+    </div>
+    <div><label>Date In:</label><input type="date" id="date"></div>
+    <div><label>Time In:</label><input type="time" id="time"></div>
+    <div><label>Date Out:</label><input type="date" id="dateOut"></div>
+    <div><label>Time Out:</label><input type="time" id="timeOut"></div>
+    <div><label>Ward:</label><input type="text" id="ward"></div>
+    <div><label>Bed:</label><input type="text" id="bed"></div>
+
+    <div class="group-3">
+      <div>
+        <label>Testing:</label>
+        <textarea id="testing"></textarea>
+      </div>
+      <div>
+        <label>Diagnosis:</label>
+        <textarea id="diagnosis"></textarea>
+      </div>
+      <div>
+        <label>Drugs Description:</label>
+        <textarea id="drugsDescription" required></textarea>
+      </div>
+    </div>
+
+    <div><label>Amount Used:</label><input type="number" id="amountUsed" required></div>
+    <div><label>Doctor (Day):</label>
+      <select id="docDay">
+        <option value="">Choose</option>
+        <option>Dr. Achieng</option>
+        <option>Dr. Mwangi</option>
+        <option>Dr. Otieno</option>
+      </select>
+    </div>
+    <div><label>Doctor (Night):</label>
+      <select id="docNight">
+        <option value="">Choose</option>
+        <option>Dr. Kamau</option>
+        <option>Dr. Wanjiru</option>
+        <option>Dr. Onyango</option>
+      </select>
+    </div>
+    <div><input type="submit" value="Add Patient"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById("patientForm");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const patient = {
+        name: document.getElementById("patientName").value,
+        age: document.getElementById("age").value,
+        village: document.getElementById("village").value,
+        number: document.getElementById("number").value,
+        gender: document.getElementById("gender").value,
+        nationalId: document.getElementById("nationalId").value,
+        paid: document.getElementById("paid").value,
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        dateOut: document.getElementById("dateOut").value,
+        timeOut: document.getElementById("timeOut").value,
+        ward: document.getElementById("ward").value,
+        bed: document.getElementById("bed").value,
+        drugsDescription: document.getElementById("drugsDescription").value,
+        testing: document.getElementById("testing").value,
+        diagnosis: document.getElementById("diagnosis").value,
+        amountUsed: document.getElementById("amountUsed").value,
+        docDay: document.getElementById("docDay").value,
+        docNight: document.getElementById("docNight").value
+      };
+
+      const patients = JSON.parse(localStorage.getItem("patients")) || [];
+      patients.push(patient);
+      localStorage.setItem("patients", JSON.stringify(patients));
+
+      alert("Patient added successfully!");
+      window.location.href = "inpatient.html"; // or form.reset() to stay on page
+    });
+  </script>
+</body>
+</html>

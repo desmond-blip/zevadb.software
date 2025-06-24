@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zeva Cashier - Billing Records</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f3f5;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #34495e;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    input[type="number"] {
+      width: 70%;
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      margin-right: 5px;
+    }
+
+    button {
+      background: #28a745;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Zeva Cashier - Patient Billing Records</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Patient ID</th>
+        <th>Test Type</th>
+        <th>Diagnosis</th>
+        <th>Drug Description</th>
+        <th>Injection</th>
+        <th>Doctor</th>
+        <th>Time Out</th>
+        <th>Amount to Pay (with Update)</th>
+      </tr>
+    </thead>
+    <tbody id="cashierTableBody"></tbody>
+  </table>
+
+  <script>
+    const outpatientData = JSON.parse(localStorage.getItem("outpatientData")) || [];
+    const billingData = JSON.parse(localStorage.getItem("billingData")) || [];
+    const cashierTableBody = document.getElementById("cashierTableBody");
+
+    outpatientData.forEach((record, index) => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${record.id ?? "N/A"}</td>
+        <td>${record.testType ?? ""}</td>
+        <td>${record.diagnosis ?? ""}</td>
+        <td>${record.drug ?? ""}</td>
+        <td>${record.injection ?? ""}</td>
+        <td>${record.doctor ?? "N/A"}</td>
+        <td>${record.timeout ?? "Not Set"}</td>
+        <td>
+          <input type="number" id="amount-${index}" value="${record.amount ?? ''}" placeholder="Enter amount" />
+          <button onclick="updateAmount(${index})">Update</button>
+        </td>
+      `;
+
+      cashierTableBody.appendChild(row);
+    });
+
+    function updateAmount(index) {
+      const amountInput = document.getElementById(`amount-${index}`);
+      const amount = amountInput.value.trim();
+
+      if (!amount || isNaN(amount) || Number(amount) <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+
+      const now = new Date();
+      const timeout = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      outpatientData[index].amount = amount;
+      outpatientData[index].timeout = timeout;
+
+      // Store updated outpatient data
+      localStorage.setItem("outpatientData", JSON.stringify(outpatientData));
+
+      // Also push to shared billingData array
+      billingData.push({
+        id: outpatientData[index].id ?? "N/A",
+        testType: outpatientData[index].testType ?? "",
+        diagnosis: outpatientData[index].diagnosis ?? "",
+        drug: outpatientData[index].drug ?? "",
+        injection: outpatientData[index].injection ?? "",
+        doctor: outpatientData[index].doctor ?? "N/A",
+        timeout,
+        amount
+      });
+
+      localStorage.setItem("billingData", JSON.stringify(billingData));
+
+      alert("Amount, time, and shared details saved successfully.");
+      window.location.reload();
+    }
+  </script>
+
+</body>
+</html>
+
+

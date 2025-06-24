@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Patient Database</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #eef2f3; padding: 20px; }
+    h2 { text-align: center; color: #2c3e50; }
+    input, select {
+      width: 90%; padding: 8px; margin: 5px auto; display: block;
+    }
+    table {
+      width: 100%; margin-top: 20px;
+      border-collapse: collapse; background: white;
+    }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+    th { background: #3498db; color: white; }
+    button {
+      margin: 10px auto; display: block;
+      padding: 10px 20px; background: #2ecc71;
+      color: white; border: none; border-radius: 5px; cursor: pointer;
+    }
+    button:hover { background: #27ae60; }
+  </style>
+</head>
+<body>
+
+<h2>Patient Records</h2>
+
+<input type="text" id="searchInput" placeholder="Search by Name..." onkeyup="filterTable()" />
+
+<input type="text" id="deleteName" placeholder="Enter name to delete" />
+<button onclick="deleteByName()">Delete Patient by Name</button>
+
+<table id="patientTable">
+  <thead>
+    <tr>
+      <th>ZH Code</th>
+      <th>National ID</th>
+      <th>Name</th>
+      <th>Age</th>
+      <th>Village</th>
+      <th>Contact</th>
+      <th>Gender</th>
+      <th>Paid Through</th>
+      <th>Testing</th>
+      <th>Diagnosis</th>
+      <th>Description</th>
+      <th>Injection</th>
+      <th>Doctor</th>
+      <th>Amount Paid</th>
+      <th>Date</th>
+      <th>Check-In Time</th>
+      <th>Check-Out Time</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<button onclick="downloadExcel()">Download Excel</button>
+
+<script>
+  const tableBody = document.querySelector("#patientTable tbody");
+
+  // Persist ZH code per patient name
+  function getPatientCodeMap() {
+    return JSON.parse(localStorage.getItem("codeMap") || "{}");
+  }
+
+  function setPatientCodeMap(map) {
+    localStorage.setItem("codeMap", JSON.stringify(map));
+  }
+
+  function generateZHCode(index, name) {
+    const map = getPatientCodeMap();
+    if (!map[name]) map[name] = "ZH" + String(Object.keys(map).length + 1).padStart(4, "0");
+    setPatientCodeMap(map);
+    return map[name];
+  }
+
+ function loadTable() {
+  const patients = JSON.parse(localStorage.getItem("patients")) || [];
+  const billingData = JSON.parse(localStorage.getItem("billingData")) || [];
+
+  const seenNames = {}; // Track names already processed
+  tableBody.innerHTML = "";
+
+  patients.forEach((p, i) => {
+    const name = p.name ?? '';
+    const isFirstVisit = !seenNames[name]; // true if first time we're seeing this name
+    seenNames[name] = true; // mark as seen
+
+    // Only include billing info if it's the first visit
+    const billingMatch = isFirstVisit
+      ? billingData.find(b => (b.id && b.id === p.id) || (b.name && b.name === p.name)) || {}
+      : {};
+
+    const zhCode = generateZHCode(i, name);
+
+    const row = tableBody.insertRow();
+    row.innerHTML = `
+      <td>${zhCode}</td>
+      <td>${p.id ?? ''}</td>
+      <td>${p.name ?? ''}</td>
+      <td>${p.age ?? ''}</td>
+      <td>${p.village ?? ''}</td>
+      <td>${p.number ?? ''}</td>
+      <td>${p.gender ?? ''}</td>
+      <td>${p.paidThrough ?? ''}</td>
+      <td>${billingMatch.testType ?? p.testing ?? ''}</td>
+      <td>${billingMatch.diagnosis ?? p.diagnosis ?? ''}</td>
+      <td>${billingMatch.drug ?? p.description ?? ''}</td>
+      <td>${billingMatch.injection ?? p.injection ?? ''}</td>
+      <td>${billingMatch.doctor ?? p.doctor ?? ''}</td>
+      <td>${billingMatch.amount ?? p.amount ?? ''}</td>
+      <td>${p.date ?? ''}</td>
+      <td>${p.checkInTime ?? ''}</td>
+      <td>${billingMatch.timeout ?? p.checkOutTime ?? ''}</td>
+      <td><button onclick="generatePDF(${i})">Download PDF</button></td>
+    `;
+  });
+}
+
+  function deleteByName() {
+    const name = document.getElementById("deleteName").value.trim().toLowerCase();
+    if (!name) return alert("Enter a valid name.");
+
+    let patients = JSON.parse(localStorage.getItem("patients")) || [];
+    const initialCount = patients.length;
+    patients = patients.filter(p => p.name.toLowerCase() !== name);
+    localStorage.setItem("patients", JSON.stringify(patients));
+
+    // Optionally remove codeMap entry
+    const codeMap = getPatientCodeMap();
+    for (let key in codeMap) {
+      if (key.toLowerCase() === name) delete codeMap[key];
+    }
+    setPatientCodeMap(codeMap);
+
+    if (patients.length < initialCount) {
+      alert("Patient deleted.");
+    } else {
+      alert("No matching patient found.");
+    }
+
+    loadTable();
+  }
+
+  async function generatePDF(index) {
+    const { jsPDF } = window.jspdf;
+    const patients = JSON.parse(localStorage.getItem("patients")) || [];
+    const billingData = JSON.parse(localStorage.getItem("billingData")) || [];
+    const p = patients[index] || {};
+    const billingMatch = billingData.find(b => b.id === p.id || b.name === p.name) || {};
+    const zhCode = generateZHCode(index, p.name);
+    const doc = new jsPDF();
+    const today = new Date().toLocaleDateString();
+
+    doc.setFontSize(16);
+    doc.text("ZEVA MEDICAL CENTRE", 105, 15, null, null, "center");
+    doc.setFontSize(12);
+    doc.text("Outpatient Report Summary", 105, 25, null, null, "center");
+
+    const fullData = {
+      "Patient Name": p.name || "-",
+      "Age": p.age || "-",
+      "ZH Code": zhCode,
+      "National ID": p.id || "-",
+      "Diagnosis": billingMatch.diagnosis || p.diagnosis || "-",
+      "Drugs Given": billingMatch.drug || p.description || "-",
+      "Injection Given": billingMatch.injection || p.injection || "-",
+      "Amount Paid": "Ksh " + (billingMatch.amount || p.amount || "0.00"),
+      "Doctor": billingMatch.doctor || p.doctor || "-",
+      "Paid Through": p.paidThrough || "-",
+      "Date": p.date || "-",
+      "Check-In": p.checkInTime || "-",
+      "Check-Out": billingMatch.timeout || p.checkOutTime || "-"
+    };
+
+    let y = 40;
+    for (const [label, value] of Object.entries(fullData)) {
+      doc.text(`${label}: ${value}`, 20, y);
+      y += 10;
+    }
+
+    doc.text("Signature: ___________________________", 20, y + 10);
+    doc.text(`Date: ${today}`, 150, y + 10);
+    doc.save(`Patient_${(p.name || 'record').replace(/\s+/g, '_')}.pdf`);
+  }
+
+  function filterTable() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const rows = tableBody.getElementsByTagName("tr");
+    for (let row of rows) {
+      row.style.display = row.cells[2].textContent.toLowerCase().includes(query) ? "" : "none";
+    }
+  }
+
+  function downloadExcel() {
+    const table = document.getElementById("patientTable");
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Patient Records" });
+    XLSX.writeFile(wb, "Patient_Records.xlsx");
+  }
+
+  let timeout;
+  function startTimeout() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      alert("Session timed out due to inactivity.");
+      window.location.href = "logout.html";
+    }, 300000); // 5 minutes
+  }
+
+  window.onload = function () {
+    loadTable();
+    startTimeout();
+    document.onmousemove = startTimeout;
+    document.onkeydown = startTimeout;
+    document.onclick = startTimeout;
+    document.onscroll = startTimeout;
+  };
+</script>
+
+</body>
+</html>

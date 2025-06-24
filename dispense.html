@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chemist Records</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #17a2b8;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .center {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .center button {
+      background-color: #28a745;
+    }
+
+    .center button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Chemist - Patient Drug Records</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Patient ID</th>
+        <th>Test Type</th>
+        <th>Diagnosis</th>
+        <th>Injection</th>
+        <th>Drug Description</th>
+        <th>Doctor</th>
+        <th>Time Out</th>
+      </tr>
+    </thead>
+    <tbody id="chemistTableBody">
+      <!-- Data will be injected here -->
+    </tbody>
+  </table>
+
+  <div class="center">
+    <button onclick="sendToPayment()">Send to Payment Page</button>
+  </div>
+
+  <script>
+  // Load chemist data or fallback to empty array
+  const chemistData = JSON.parse(localStorage.getItem("chemistData")) || [];
+
+  // Ensure all records have timeout and amount fields
+  const updatedData = chemistData.map(item => ({
+    id: item.id || '',
+    testType: item.testType || '',
+    diagnosis: item.diagnosis || '',
+    injection: item.injection || '',
+    drug: item.drug || '',
+    doctor: item.doctor || '',
+    timeout: item.timeout || '',
+    amount: item.amount || ''
+  }));
+
+  // Store into outpatientData to be used by cashier
+  localStorage.setItem("outpatientData", JSON.stringify(updatedData));
+
+  const chemistTableBody = document.getElementById("chemistTableBody");
+
+  updatedData.forEach((record, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${record.id}</td>
+      <td>${record.testType}</td>
+      <td>${record.diagnosis}</td>
+      <td>${record.injection}</td>
+      <td>${record.drug}</td>
+      <td>${record.doctor}</td>
+      <td id="timeout-${index}">
+        <button onclick="markTimeOut(${index})">Mark Time</button>
+      </td>
+    `;
+    chemistTableBody.appendChild(row);
+  });
+
+  // Save timeout to localStorage
+  function markTimeOut(index) {
+    const now = new Date().toLocaleString();
+    const timeoutCell = document.getElementById(`timeout-${index}`);
+    timeoutCell.textContent = now;
+
+    const data = JSON.parse(localStorage.getItem("outpatientData")) || [];
+    data[index].timeout = now;
+    localStorage.setItem("outpatientData", JSON.stringify(data));
+  }
+
+  // Navigate to cashier/payment page
+  function sendToPayment() {
+    const rows = document.querySelectorAll("tbody tr");
+    const data = JSON.parse(localStorage.getItem("outpatientData")) || [];
+
+    rows.forEach((row, index) => {
+      const timeoutCell = row.querySelector(`#timeout-${index}`);
+      if (timeoutCell && timeoutCell.textContent && !timeoutCell.textContent.includes("Mark Time")) {
+        data[index].timeout = timeoutCell.textContent;
+      }
+    });
+
+    localStorage.setItem("outpatientData", JSON.stringify(data));
+    window.location.href = "payment.html";
+  }
+</script>
+
+
+
+</body>
+</html>

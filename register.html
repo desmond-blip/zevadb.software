@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Patient Entry</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #eef2f3; }
+    form { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    form div { margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    input[type="submit"] { background: #3498db; color: white; cursor: pointer; }
+    input[type="submit"]:hover { background: #2980b9; }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Patient Information Entry</h2>
+  <form id="patientForm" autocomplete="off">
+    <div><label>National ID:</label><input type="text" id="id" required></div>
+    <div><label>Name:</label><input type="text" id="name" required></div>
+    <div><label>Age:</label><input type="number" id="age" required></div>
+    <div><label>Village:</label><input type="text" id="village" required></div>
+    <div><label>Contact Number:</label><input type="text" id="number" required></div>
+    <div>
+      <label>Gender:</label>
+      <select id="gender" required>
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div>
+      <label>Paid Through:</label>
+      <select id="paidThrough" required>
+        <option value="">Select</option>
+        <option>SHA</option>
+        <option>MPESA</option>
+        <option>CASH</option>
+      </select>
+    </div>
+    <div><label>Date:</label><input type="date" id="date" required></div>
+    <div><label>Check-In Time:</label><input type="time" id="checkInTime" required></div>
+    <div><input type="submit" value="Add Patient"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById("patientForm");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const patient = {
+        id: document.getElementById("id").value,
+        name: document.getElementById("name").value,
+        age: document.getElementById("age").value,
+        village: document.getElementById("village").value,
+        number: document.getElementById("number").value,
+        gender: document.getElementById("gender").value,
+        paidThrough: document.getElementById("paidThrough").value,
+        date: document.getElementById("date").value,
+        checkInTime: document.getElementById("checkInTime").value
+      };
+
+      const patients = JSON.parse(localStorage.getItem("patients")) || [];
+      patients.push(patient);
+      localStorage.setItem("patients", JSON.stringify(patients));
+
+      const allPatients = JSON.parse(localStorage.getItem("allPatients")) || [];
+      allPatients.push(patient);
+      localStorage.setItem("allPatients", JSON.stringify(allPatients));
+
+      alert("Patient added successfully!");
+      form.reset();
+      window.location.href = "outpatient.html";
+    });
+  </script>
+</body>
+</html>
